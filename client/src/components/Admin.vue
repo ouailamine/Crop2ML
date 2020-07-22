@@ -1,0 +1,267 @@
+<template>
+      <div>
+          
+          <div>
+              <hr>
+              <h3 style="background-color:grey">Admin</h3>
+              <hr>
+          </div>
+
+          <div>
+              <h3>Recherche</h3><br>
+              <form style="text-align:center;">
+              <label >Par Titre<input type="radio"  checked="checked" name="radio" v-model="variable" value='titre'/><span class="checkmark"></span></label>
+              <label >Par Auteur<input type="radio" name="radio" v-model="variable" value='auteur'><span class="checkmark" ></span></label><br>
+             <center> <mdb-input  type="text" label="un auteur ou un titre" outline v-model="recherchee" style="width:40%;"/></center>
+              
+              <b-button size="sm" variant="secondary" @click="recherche()" >recherche</b-button><br>
+              </form>
+          </div>
+
+          <hr>
+          <div>
+              <h5><b>Liste des models</b></h5>
+              <label >Touts les models<input type="radio" checked="checked" name="radio" @click="checkModels()" v-model="publie" value='all'/><span class="checkmark"></span></label>
+              <label >Models validé<input type="radio" name="radio" @click="checkModels()" v-model="publie" value='true'><span class="checkmark" ></span></label>
+              <label >Models non validé<input type="radio" name="radio" @click="checkModels()" v-model="publie" value='false'><span class="checkmark" ></span></label><br>
+              <b-button size="sm" variant="secondary" @click="getModels()">Afficher</b-button>
+          </div>
+          <hr>
+          <div v-if="this.models !== []" id="listModels">
+              <mdb-container style="align:center" >
+                  <div  class="row">
+                    <div class="col-md-4">
+                      <mdb-card  wide v-for="(model, index) in models" :key="index" style="margin:20px;" >
+                        <mdb-view gradient="peach" cascade>
+                          <h2 class="card-header-title mb-3">{{model.titre}}</h2>
+                          <mdb-btn size="sm" @click="showDetails(model.titre)" gradient="blue" rounded><mdb-icon icon="angle-double-right" />Details</mdb-btn>
+                        </mdb-view>
+                      </mdb-card>
+                    </div>
+                    <div id="details" style="display:none;height:100%;width:100%;" class="col-md-8" >
+                        <mdb-view gradient="peach" cascade  v-for="(modele, index) in showModels" :key="index"  class="text-center"  >
+                          <mdb-card-text>
+                           <h2 class="card-header-title mb-3">{{modele.titre}}</h2>
+                          <p class="mb-0"> L'auteur : {{ modele.auteur }}</p>
+                          <p class="mb-0"> Mail auteur : {{ modele.mail }}</p>
+                          {{modele.details}} Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus, ex, recusandae. mdbIconcere modi sunt, quod quibusdam dignissimos neque rem nihil ratione est placeat vel, natus non quos laudantium veritatis sequi.Ut enim ad minima veniam, quis nostrum.</mdb-card-text>
+                          <b-button v-if="publie === 'false'" @click="deleteModel(modele.titre)" size="sm" variant="success">valider</b-button>
+                          <b-button size="sm" variant="danger" @click="valideModel(modele.titre)">supprimer</b-button><br><br>
+                          <mdb-btn tag="a" gradient="blue" floating size="sm" @click="closeDetails">Fermer</mdb-btn>
+                        </mdb-view>
+                    </div>
+                  </div><br>
+              </mdb-container>
+          </div>
+          <hr>
+          <div>
+                <h5><b>Liste de touts les utilisateurs</b></h5>
+                <label >les utilisateurs<input type="radio" @click="checkuser" checked="checked" name="radio" v-model="userRole" value='user'/><span class="checkmark"></span></label>
+                <label >les administrateurs<input type="radio" @click="checkuser" name="radio" v-model="userRole" value='admin'><span class="checkmark" ></span></label><br>
+                <b-button size="sm" variant="secondary" @click="getuserss">Afficher les utilisateurs</b-button>
+                <div v-if="this.users !== []" style="display:none;" id="listusers">
+                      <table class="table table-striped">
+                        <thead >
+                          <tr>
+                            <th >utilisateurs</th>
+                            <th >email</th>
+                            <th >role</th>
+                            <th v-if="userRole == 'user'" >Operations</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="(user, index) in users" :key="index">
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.role }}</td>
+                            <td  v-if="userRole == 'user'"><b-button  size="sm" variant="primary" @click="addAdmin(user.email)">Admin</b-button></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                </div>
+          </div>
+      </div>
+</template>
+
+<script>
+
+import CropDataServices from "../services/CropDataServices";
+  import { mdbContainer,mdbInput, mdbRow, mdbCol, mdbCard, mdbCardImage, mdbCardHeader, mdbCardBody, mdbCardTitle, mdbCardText, mdbCardFooter, mdbCardUp, mdbCardAvatar, mdbCardGroup, mdbBtn, mdbView, mdbMask, mdbIcon } from 'mdbvue';
+  export default {
+    name: 'CardProPage',
+		components: {
+			mdbContainer,
+			mdbRow,
+			mdbCol,
+			mdbCard,
+			mdbCardImage,
+			mdbCardHeader,
+			mdbCardBody,
+			mdbCardTitle,
+			mdbCardText,
+			mdbCardFooter,
+			mdbCardUp,
+			mdbCardAvatar,
+			mdbCardGroup,
+			mdbBtn,
+			mdbView,
+			mdbMask,
+			mdbIcon,mdbInput,
+    },
+    data() {
+      return {
+        showModels: [],
+        models: [],
+         users: [],
+         publie:"",
+         variable:'',
+         recherchee:'',
+         message:''
+         ,msg:"",userRole:"",
+       
+      }
+    },
+
+async created(){},
+     
+methods: {
+  
+  async getuserss(){
+    var userRole = this.userRole
+    if(userRole == ''){
+      this.$bvToast.toast('il faut choisir ', {
+          title: `Notification`,
+          variant:this.userRole,
+          solid: true,}) }
+          
+    else{
+      if(userRole === "user"){
+        document.getElementById('listusers').style.display='block';
+        var transaction = "users" 
+        console.log(userRole,transaction);
+        CropDataServices.getusers(userRole,transaction).then(response => {
+          this.users= response.data;
+          console.log(response.data);
+          console.log(this.users);
+          })
+      }   
+      if(userRole === "admin"){
+          document.getElementById('listusers').style.display='block';
+          var transaction = "admin users" 
+          console.log(userRole,transaction);
+          CropDataServices.getusers(userRole,transaction).then(response => {
+            this.users= response.data;
+            console.log(this.users);
+              })
+      }       
+    }},
+
+async getModels() {
+  if(this.publie === ''){
+        this.$bvToast.toast('il faut choisir ', {
+          title: `Notification`,
+          variant:this.variable,
+          solid: true,
+          
+        })
+     
+  }else{
+    document.getElementById('listModels').style.display='block';
+    var publiee = this.publie
+    console.log(publiee)
+    if(this.publie === 'all') {
+      CropDataServices.getAllmodels().then(response => {
+        this.models= response.data;
+        console.log(response.data);
+        console.log(this.models);
+        })
+    }else{
+      document.getElementById('listModels').style.display='block';
+      CropDataServices.getmodels(publiee).then(response => {
+        this.models= response.data;
+        console.log(response.data);
+        console.log(this.models);
+        })
+        }
+      }
+  },
+
+
+async recherche() {
+  if(this.variable === ''){
+        this.$bvToast.toast('il faut choisir ', {
+          title: `Notification`,
+          variant:this.variable,
+          solid: true,})
+     
+  }else{
+    var recherche = this.variable
+    console.log(recherche)
+    var recherchee = this.recherchee
+    console.log(recherchee)
+    if(this.variable === 'titre') {
+        var transaction = "recherche par titre"
+        var titre = this.recherchee
+        CropDataServices.search(recherche,transaction,titre).then(response => {
+           if(response.data.length > 0){
+                this.models= response.data;
+                console.log(response.data);
+                console.log(this.models);}
+          else{  
+            console.log("elsetitre")
+            this.$bvToast.toast('titre introuvable ', {
+          title: `Notification`,
+          variant:this.variable,
+          solid: true,})}      
+                
+        })
+
+    }else{
+        var transaction = "recherche par auteur"
+        var auteur = this.recherchee
+        CropDataServices.search(recherche,transaction,auteur).then(response => {
+          if(response.data.length > 0){
+                this.models= response.data;
+                console.log(response.data.length);
+                console.log(this.models);}
+          else{this.$bvToast.toast('Auteur introuvable ', {
+          title: `Notification`,
+          variant:this.variable,
+          solid: true,})}
+              })}
+            
+            }},
+
+async addAdmin(email){
+  console.log(email)
+  CropDataServices.addAdmin(email).then(response => {
+             if(response == true) { 
+               console.log("ok")
+          this.$bvToast.toast('user ajouter comme admin ', {
+          title: `Notification`,
+          solid: true,})   
+            }
+   })},
+
+async showDetails(a){
+  let titre = a
+  console.log(a)
+  document.getElementById('details').style.display='block';
+  CropDataServices.getShowModel(titre).then(response => {
+          this.showModels = response.data;
+          console.log(response.data);
+          console.log(this.models);
+        })},
+  
+async closeDetails(){document.getElementById('details').style.display='none';},
+async checkModels(){document.getElementById('listModels').style.display='none';},
+async checkuser(){document.getElementById('listusers').style.display='none';}
+ }
+
+  
+  }
+</script>
+
+<style scoped>
+
+</style>>

@@ -1,0 +1,6 @@
+[
+	
+
+  
+  {"userName":"developper", "email":"aminedevelopper@inrae.fr", "password":"123456", "role":"developper"},
+  {"userName":"admin", "email":"amineadmin@inrae.fr", "password":"123456", "role":"admin"}]

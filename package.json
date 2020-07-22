@@ -1,0 +1,35 @@
+{
+  "name": "apex-territoire",
+  "version": "1.0.0",
+  "description": " apex territoire",
+  "author": "vincent armant",
+  "scripts": {
+    "dev": "nodemon server/index.js",
+    "start": "vue-cli-service serve --open",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "generate-password": "^1.5.1",
+    "leaflet": "^1.6.0",
+    "mariadb": "^2.3.1",
+    "mdbvue": "^6.7.1",
+    "mongoose": "^5.9.21",
+    "nodemailer": "^6.4.8",
+    "vue2-leaflet": "^2.5.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2",
+    "vue-cli-plugin-mdb": "~2.1.0"
+  },
+  "engines": {
+    "node": "10.x"
+  },
+  "license": "MIT"
+}
